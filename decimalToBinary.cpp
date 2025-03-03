@@ -9,13 +9,16 @@ int decToBin(int decimalNum)
         int remainder = decimalNum % 2;
         decimalNum /= 2;
         ans += remainder * pow;
-        pow*=10;
+        pow *= 10;
     }
     return ans;
 }
 
 int main()
 {
-    cout<<"\nBinary Number: "<<decToBin(10)<<endl<<endl;
+    int number;
+    cout << "\nEnter a decimal Number: ";
+    cin >> number;
+    cout << "\nBinary Number: " << decToBin(number) << "\n\n";
     return 0;
 }
