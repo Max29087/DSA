@@ -4,6 +4,7 @@ struct node
 {
     int data;
     struct node *next;
+    struct node *previous;
 };
 void menu();
 struct node *createNewNode();
@@ -122,6 +123,7 @@ struct node *createNewNode()
     cout << "Enter Data:";
     cin >> newNode->data;
     newNode->next = NULL;
+    newNode->previous = NULL;
     cout << endl;
     cout << "New Node Create Successfully." << endl;
     return newNode;
@@ -133,6 +135,7 @@ struct node *insertHead(struct node *head, struct node *newNode)
     if (head != NULL)
     {
         newNode->next = head;
+        head->previous = newNode;
     }
     head = newNode;
     cout << endl;
@@ -151,6 +154,7 @@ struct node *insertTail(struct node *head, struct node *newNode)
             temp = temp->next;
         }
         temp->next = newNode;
+        newNode->previous = temp;
         cout << endl;
         cout << "Tail Insert Successfully." << endl;
     }
@@ -193,6 +197,8 @@ struct node *insert_Nth_Position(struct node *head)
             temp = temp->next;
         }
         newNode->next = temp->next;
+        newNode->previous = temp;
+        temp->next->previous = newNode;
         temp->next = newNode;
         cout << "Data Insert Nth Position." << endl;
     }
@@ -227,6 +233,10 @@ struct node *deleteHead(struct node *head)
 {
     struct node *temp = head;
     head = head->next;
+    if (head != NULL)
+    {
+        head->previous = NULL;
+    }
     delete (temp);
     cout << "Head delete Successfully." << endl;
     return head;
@@ -236,11 +246,11 @@ struct node *deleteHead(struct node *head)
 struct node *deleteTail(struct node *head)
 {
     struct node *temp = head;
-    int list_Size = listSize(head);
-    if (list_Size == 1)
+    if (head->next == NULL)
     {
         cout << "List size 1, So tail = head." << endl;
-        head = deleteHead(head);
+        delete (head);
+        return NULL;
     }
     else
     {
@@ -248,7 +258,9 @@ struct node *deleteTail(struct node *head)
         {
             temp = temp->next;
         }
+        struct node *del = temp->next;
         temp->next = NULL;
+        delete (del);
         cout << "Tail delete Successfully." << endl;
     }
     return head;
@@ -280,6 +292,7 @@ struct node *deleteNthData(struct node *head)
         }
         del = temp->next;
         temp->next = del->next;
+        del->next->previous = temp;
         delete (del);
         cout << "Successfully Delete Nth Position Data." << endl;
     }

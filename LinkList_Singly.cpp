@@ -236,11 +236,11 @@ struct node *deleteHead(struct node *head)
 struct node *deleteTail(struct node *head)
 {
     struct node *temp = head;
-    int list_Size = listSize(head);
-    if (list_Size == 1)
+    if (head->next == NULL)
     {
         cout << "List size 1, So tail = head." << endl;
-        head = deleteHead(head);
+        delete (head);
+        return NULL;
     }
     else
     {
@@ -248,7 +248,9 @@ struct node *deleteTail(struct node *head)
         {
             temp = temp->next;
         }
+        struct node *del = temp->next;
         temp->next = NULL;
+        delete (del);
         cout << "Tail delete Successfully." << endl;
     }
     return head;
@@ -257,6 +259,7 @@ struct node *deleteTail(struct node *head)
 // Delete Nth position data;
 struct node *deleteNthData(struct node *head)
 {
+    int size = listSize(head);
     int position;
     cout << "Enter Delete Position: ";
     cin >> position;
@@ -265,12 +268,12 @@ struct node *deleteNthData(struct node *head)
         cout << "Delete position 1, So head delete..." << endl;
         head = deleteHead(head);
     }
-    else if (position == listSize(head))
+    else if (position == size)
     {
         cout << "Delete position = list size,So tail delete..." << endl;
         head = deleteTail(head);
     }
-    else if (position > 1 && position < listSize(head))
+    else if (position > 1 && position < size)
     {
         struct node *temp = head;
         struct node *del;
