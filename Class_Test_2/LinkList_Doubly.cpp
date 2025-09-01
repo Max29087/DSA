@@ -4,6 +4,7 @@ struct node
 {
     int data;
     struct node *next;
+    struct node *previous;
 };
 void menu();
 struct node *createNewNode();
@@ -14,10 +15,9 @@ struct node *insert_Nth_Position(struct node *head);
 struct node *deleteHead(struct node *head);
 struct node *deleteTail(struct node *head);
 struct node *deleteNthData(struct node *head);
-struct node *updateNodeValue(struct node *head);
-void reverseLinkedList(struct node *head);
-struct node *BinarySearch(struct node *head, int key);
-struct node *midFind(struct node *start, struct node *end);
+int totalCoinsInAllRoom(struct node *head);
+struct node *searchDistroy(struct node *head, int trap);
+struct node *SplitRun(struct node *head, int position);
 void printList(struct node *temp);
 int main()
 {
@@ -33,8 +33,6 @@ int main()
         {
             newNode = createNewNode(); // Create Node;
             head = insertHead(head, newNode);
-            cout << "Head Insert Successfully." << endl;
-            cout << endl;
         }
 
         // Insert Tail;
@@ -89,29 +87,40 @@ int main()
             }
         }
 
-        // Update a Node Value.
+        // Total coins in all rooms
         else if (choise == 7)
         {
-            head = updateNodeValue(head);
+            cout << "The total coins collected: ";
+            cout << totalCoinsInAllRoom(head);
+            cout << endl;
         }
 
-        // Reverse the Linked List.
+        // Search and Distroy;
         else if (choise == 8)
         {
-            reverseLinkedList(head);
+            if (head != NULL)
+            {
+                int trap;
+                cout << "Enter trap value:";
+                cin >> trap;
+                head = searchDistroy(head, trap);
+            }
+            else
+            {
+                cout << "Room empty!" << endl;
+            }
         }
 
-        // Search and Modify the List.
+        // Split & Run
         else if (choise == 9)
         {
-            int key;
-            cout << "Current List: ";
-            printList(head);
-            cout << "Enter Key:";
-            cin >> key;
-            head = BinarySearch(head, key);
-            cout << "Updated List: ";
-            printList(head);
+            if (head != NULL)
+            {
+                int position;
+                cout << "Enter Split Position: ";
+                cin >> position;
+                head = SplitRun(head, position);
+            }
         }
 
         // Print List ;
@@ -141,10 +150,10 @@ void menu()
     cout << "4. Delete Head." << endl;
     cout << "5. Delete Tail." << endl;
     cout << "6. Delete Nth position Data." << endl;
-    cout << "7. Update a Node Value." << endl;
-    cout << "8. Reverse the Linked List." << endl;
-    cout << "9. Search and Modify the List." << endl;
-    cout << "10. Print List & Size." << endl;
+    cout << "7. Total coins in all Rooms." << endl;
+    cout << "8. Search and Distroy Trap." << endl;
+    cout << "9. Split & Run." << endl;
+    cout << "10. Print List." << endl;
     cout << "0. Exit." << endl;
     cout << "Enter Your Choise: ";
 }
@@ -156,6 +165,7 @@ struct node *createNewNode()
     cout << "Enter Data:";
     cin >> newNode->data;
     newNode->next = NULL;
+    newNode->previous = NULL;
     cout << endl;
     cout << "New Node Create Successfully." << endl;
     return newNode;
@@ -167,8 +177,11 @@ struct node *insertHead(struct node *head, struct node *newNode)
     if (head != NULL)
     {
         newNode->next = head;
+        head->previous = newNode;
     }
     head = newNode;
+    cout << endl;
+    cout << "Head Insert Successfully." << endl;
     return head;
 }
 
@@ -183,6 +196,7 @@ struct node *insertTail(struct node *head, struct node *newNode)
             temp = temp->next;
         }
         temp->next = newNode;
+        newNode->previous = temp;
         cout << endl;
         cout << "Tail Insert Successfully." << endl;
     }
@@ -225,6 +239,8 @@ struct node *insert_Nth_Position(struct node *head)
             temp = temp->next;
         }
         newNode->next = temp->next;
+        newNode->previous = temp;
+        temp->next->previous = newNode;
         temp->next = newNode;
         cout << "Data Insert Nth Position." << endl;
     }
@@ -259,6 +275,10 @@ struct node *deleteHead(struct node *head)
 {
     struct node *temp = head;
     head = head->next;
+    if (head != NULL)
+    {
+        head->previous = NULL;
+    }
     delete (temp);
     cout << "Head delete Successfully." << endl;
     return head;
@@ -291,7 +311,6 @@ struct node *deleteTail(struct node *head)
 // Delete Nth position data;
 struct node *deleteNthData(struct node *head)
 {
-    int size = listSize(head);
     int position;
     cout << "Enter Delete Position: ";
     cin >> position;
@@ -300,12 +319,12 @@ struct node *deleteNthData(struct node *head)
         cout << "Delete position 1, So head delete..." << endl;
         head = deleteHead(head);
     }
-    else if (position == size)
+    else if (position == listSize(head))
     {
         cout << "Delete position = list size,So tail delete..." << endl;
         head = deleteTail(head);
     }
-    else if (position > 1 && position < size)
+    else if (position > 1 && position < listSize(head))
     {
         struct node *temp = head;
         struct node *del;
@@ -315,6 +334,7 @@ struct node *deleteNthData(struct node *head)
         }
         del = temp->next;
         temp->next = del->next;
+        del->next->previous = temp;
         delete (del);
         cout << "Successfully Delete Nth Position Data." << endl;
     }
@@ -325,144 +345,91 @@ struct node *deleteNthData(struct node *head)
     return head;
 }
 
-// Update a Node Value.
-struct node *updateNodeValue(struct node *head)
+// Total coins in all rooms
+int totalCoinsInAllRoom(struct node *head)
 {
-    int position;
     int size = listSize(head);
-    if (head != NULL)
+    int sum = 0;
+    struct node *temp = head;
+    for (int i = 1; i <= size; i++)
     {
-        cout << "Current List: ";
+        sum += temp->data;
+        temp = temp->next;
+    }
+    return sum;
+}
+
+// Search and Distroy;
+struct node *searchDistroy(struct node *head, int trap)
+{
+    int size = listSize(head);
+    int index = -1;
+    struct node *temp = head;
+    for (int i = 1; i <= size; i++)
+    {
+        if (temp->data == trap)
+        {
+            cout << "Trap " << trap << " found in room " << i << " and Distroyed!" << endl;
+            index = i;
+            break;
+        }
+        temp = temp->next;
+    }
+    if (index == 1)
+    {
+        struct node *del = head;
+        head = head->next;
+        delete (del);
+        cout << "Update dungeon rooms: ";
         printList(head);
-        cout << "Enter Position: ";
-        cin >> position;
-        if (position == 1)
+    }
+    else if (index > 1)
+    {
+        struct node *temp2 = head;
+        for (int i = 1; i < index - 1; i++)
         {
-            cout << "Enter new value: ";
-            cin >> head->data;
-            cout << "Updated List: ";
-            printList(head);
+            temp2 = temp2->next;
         }
-        else if (position > 1 && position <= size)
-        {
-            struct node *temp = head;
-            for (int i = 1; i < position; i++)
-            {
-                temp = temp->next;
-            }
-            cout << "Enter new value: ";
-            cin >> temp->data;
-            cout << "Updated List: ";
-            printList(head);
-        }
-        else
-        {
-            cout << "Invalit Position!" << endl;
-        }
+        struct node *del = temp2->next;
+        temp2->next = del->next;
+        delete (del);
+        cout << "Update dungeon rooms: ";
+        printList(head);
     }
     else
     {
-        cout << "List Empty!" << endl;
+        cout << "No traps found!" << endl;
     }
     return head;
 }
 
-// Reverse the Linked List.
-void reverseLinkedList(struct node *head)
+// Split and Run
+struct node *SplitRun(struct node *head, int position)
 {
     int size = listSize(head);
-    if (head == NULL)
+    if (size == 1)
     {
-        cout << "List empty!" << endl;
+        cout << "List Size 1. Nothig to Split." << endl;
     }
-    else
+    if (size > 1)
     {
-        cout << "Current List: ";
-        printList(head);
-        struct node *tempList = NULL;
         struct node *temp = head;
-        for (int i = 1; i <= size; i++)
+        struct node *tempHead = NULL;
+        for (int i = 1; i < size-1; i++)
         {
-            struct node *newNode = new node;
-            newNode->data = temp->data;
-            newNode->next = NULL;
-            tempList = insertHead(tempList, newNode);
+            if (i > position + 1)
+            {
+                struct node *del = temp;
+                tempHead = insertTail(tempHead, del);
+                temp->next = del->next;
+                delete (del);
+            }
             temp = temp->next;
         }
-        cout << "Reversed List: ";
-        printList(tempList);
-        cout << endl;
+        cout << "Path1: ";
+        printList(head);
+        cout << "Path2: ";
+        printList(tempHead);
     }
-}
-
-// Search and Modify the List.
-struct node *BinarySearch(struct node *head, int key)
-{
-    struct node *start = head;
-    struct node *end = NULL;
-    while (start != end)
-    {
-        struct node *mid = midFind(start, end);
-        if (mid == NULL)
-        {
-            return head;
-        }
-        else if (mid->data == key)
-        {
-            if (mid == head)
-            {
-                head = head->next;
-                delete (mid);
-                cout << "Key found and deleted." << endl;
-                return head;
-            }
-            else
-            {
-                struct node *temp = head;
-                while (temp->next != mid)
-                {
-                    temp = temp->next;
-                }
-                temp->next = mid->next;
-                delete (mid);
-                cout << "Key found and deleted." << endl;
-                return head;
-            }
-        }
-        else if (mid->data > key)
-        {
-            end = mid;
-        }
-        else
-        {
-            start = mid->next;
-        }
-    }
-    cout << "Key not found, so inserted at the end" << endl;
-    struct node *newNode = new node;
-    newNode->data = key;
-    newNode->next = NULL;
-    head = insertTail(head, newNode);
     return head;
-}
-
-// Find Mid
-struct node *midFind(struct node *start, struct node *end)
-{
-    if (start == NULL)
-    {
-        return NULL;
-    }
-    struct node *slow = start;
-    struct node *fast = start->next;
-    while (fast != end)
-    {
-        fast = fast->next;
-        if (fast != end)
-        {
-            slow = slow->next;
-            fast = fast->next;
-        }
-    }
-    return slow;
 }

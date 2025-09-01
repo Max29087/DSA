@@ -5,22 +5,23 @@ int StackPush(int data[], int top, int v);
 int StackPop(int data[], int top);
 int main()
 {
-    int data[100], n, top = 0;
+    int n, top = 0;
     cout << "Enter stack size:";
     cin >> n;
-    int ch, v;
+    int data[n];
+    int choise, value;
     while (1)
     {
         manu();
         cout << "Enter Your Choice: ";
-        cin >> ch;
-        if (ch == 1)
+        cin >> choise;
+        if (choise == 1)
         {
             if (top < n)
             {
                 cout << "Enter a value: ";
-                cin >> v;
-                top = StackPush(data, top, v);
+                cin >> value;
+                top = StackPush(data, top, value);
                 cout << "Value added successfully." << endl;
                 cout << endl;
             }
