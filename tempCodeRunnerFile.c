@@ -1,1 +1,0 @@
-printf("%d dequeued!\n\n", data[front]);
